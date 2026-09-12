@@ -1,0 +1,18 @@
+{
+  "name": "Nosha Shop",
+  "short_name": "Nosha Shop",
+  "description": "Simple offline shop management for sales, stock, expenses and reports.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8faf4",
+  "theme_color": "#3f8f68",
+  "icons": [
+    {
+      "src": "/nosha-shop-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
