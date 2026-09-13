@@ -197,6 +197,7 @@ export const initialData = (): ShopData => ({
   purchases: [],
   adjustments: [],
   closings: [],
+  lastClosingAt: undefined,
   settings: { shopName: "Nosha Shop", currency: "$", lowStockDefault: 5 },
 });
 

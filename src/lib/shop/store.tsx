@@ -128,6 +128,9 @@ export const isSameDay = (iso: string, d = new Date()) => {
   );
 };
 
+export const isOpenDayRecord = (iso: string, lastClosingAt?: string, date = new Date()) =>
+  !lastClosingAt || !isSameDay(lastClosingAt, date) || new Date(iso) > new Date(lastClosingAt);
+
 export const startOfWeek = (d = new Date()) => {
   const x = new Date(d);
   const day = (x.getDay() + 6) % 7;
@@ -311,7 +314,11 @@ export function ShopProvider({ children }: { children: ReactNode }) {
         }),
       saveClosing: (c) => {
         const closing: DailyClosing = { ...c, id: uid() };
-        mutate((d) => ({ ...d, closings: [closing, ...d.closings] }));
+        mutate((d) => ({
+          ...d,
+          closings: [closing, ...d.closings],
+          lastClosingAt: closing.date,
+        }));
         return closing;
       },
       updateSettings: (s) => mutate((d) => ({ ...d, settings: { ...d.settings, ...s } })),
@@ -340,8 +347,12 @@ export function useShop() {
 export function useDayTotals(date = new Date()) {
   const { data } = useShop();
   return useMemo(() => {
-    const sales = data.sales.filter((s) => isSameDay(s.date, date));
-    const expenses = data.expenses.filter((e) => isSameDay(e.date, date));
+    const sales = data.sales.filter(
+      (s) => isSameDay(s.date, date) && isOpenDayRecord(s.date, data.lastClosingAt, date),
+    );
+    const expenses = data.expenses.filter(
+      (e) => isSameDay(e.date, date) && isOpenDayRecord(e.date, data.lastClosingAt, date),
+    );
     const totalSales = sales.reduce((s, x) => s + x.total, 0);
     const cashSales = sales.filter((s) => s.payment === "Cash").reduce((s, x) => s + x.total, 0);
     const creditSales = 0;
@@ -364,7 +375,7 @@ export function useDayTotals(date = new Date()) {
       grossProfit,
       netResult: grossProfit - totalExpenses,
     };
-  }, [data.sales, data.expenses, date.toDateString()]);
+  }, [data.sales, data.expenses, data.lastClosingAt, date.toDateString()]);
 }
 
 export function useLowStock() {

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/sales")({
       { title: "Sales | Nosha Shop Manager" },
       {
         name: "description",
-        content: "Search products, build a sale and take payment by cash, EcoCash, bank or credit.",
+        content: "Search products, build a sale and take payment by cash.",
       },
       { property: "og:title", content: "Sales | Nosha Shop Manager" },
       { property: "og:description", content: "Fast till screen for everyday shop sales." },

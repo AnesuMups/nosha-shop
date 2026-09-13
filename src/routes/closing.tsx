@@ -339,13 +339,7 @@ function ClosingPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {(["Cash", "EcoCash", "Bank/Transfer", "Credit"] as PaymentMethod[]).map(
-                        (m) => (
-                          <SelectItem key={m} value={m}>
-                            {m}
-                          </SelectItem>
-                        ),
-                      )}
+                      <SelectItem value="Cash">Cash</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

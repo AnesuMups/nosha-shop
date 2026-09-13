@@ -24,7 +24,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_EXPENSE_CATEGORY, EXPENSE_CATEGORIES } from "@/lib/shop/sample-data";
-import { isSameDay, money, startOfMonth, startOfWeek, useShop } from "@/lib/shop/store";
+import {
+  isOpenDayRecord,
+  isSameDay,
+  money,
+  startOfMonth,
+  startOfWeek,
+  useShop,
+} from "@/lib/shop/store";
 import type { ExpensePaymentMethod } from "@/lib/shop/types";
 
 export const Route = createFileRoute("/expenses")({
@@ -42,7 +49,7 @@ export const Route = createFileRoute("/expenses")({
   component: ExpensesPage,
 });
 
-const METHODS: ExpensePaymentMethod[] = ["Cash", "EcoCash", "Bank/Transfer"];
+const METHODS: ExpensePaymentMethod[] = ["Cash"];
 const todayInput = () => new Date().toISOString().slice(0, 10);
 
 function ExpensesPage() {
@@ -70,7 +77,9 @@ function ExpensesPage() {
     const week = startOfWeek();
     const month = startOfMonth();
     return {
-      today: data.expenses.filter((e) => isSameDay(e.date)).reduce((s, e) => s + e.amount, 0),
+      today: data.expenses
+        .filter((e) => isSameDay(e.date) && isOpenDayRecord(e.date, data.lastClosingAt))
+        .reduce((s, e) => s + e.amount, 0),
       week: data.expenses.filter((e) => new Date(e.date) >= week).reduce((s, e) => s + e.amount, 0),
       month: data.expenses
         .filter((e) => new Date(e.date) >= month)

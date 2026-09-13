@@ -1,5 +1,5 @@
 export type PaymentMethod = "Cash";
-export type ExpensePaymentMethod = "Cash" | "EcoCash" | "Bank/Transfer";
+export type ExpensePaymentMethod = "Cash";
 
 export interface Product {
   id: string;
@@ -96,5 +96,6 @@ export interface ShopData {
   purchases: Purchase[];
   adjustments: StockAdjustment[];
   closings: DailyClosing[];
+  lastClosingAt?: string | undefined;
   settings: Settings;
 }
