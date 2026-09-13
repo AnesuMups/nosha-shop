@@ -1,4 +1,4 @@
-const CACHE_NAME = "nosha-shop-shell-v3";
+const CACHE_NAME = "nosha-shop-shell-v4";
 const APP_SHELL = ["/", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

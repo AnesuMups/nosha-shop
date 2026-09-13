@@ -136,7 +136,7 @@ function RootComponent() {
   useEffect(() => {
     if (typeof window !== "undefined" && "serviceWorker" in navigator) {
       void navigator.serviceWorker
-        .register("/sw.js")
+        .register("/sw-v4.js", { updateViaCache: "none" })
         .then(() => navigator.serviceWorker.ready)
         .then(() => {
           if (!navigator.serviceWorker.controller) {
