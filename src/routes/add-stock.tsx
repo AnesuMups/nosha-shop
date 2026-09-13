@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { money, searchProducts, useShop } from "@/lib/shop/store";
+import { money, searchProducts, stockStatus, useShop } from "@/lib/shop/store";
+import { StockBadge } from "@/components/shop/StatCard";
 
 export const Route = createFileRoute("/add-stock")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -49,7 +50,8 @@ function AddStockPage() {
   }, [selectedId]);
 
   const results = useMemo(
-    () => (term.trim() ? searchProducts(data.products, term).slice(0, 8) : []),
+    () =>
+      [...searchProducts(data.products, term)].sort((a, b) => a.name.localeCompare(b.name)),
     [data.products, term],
   );
 
@@ -117,27 +119,41 @@ function AddStockPage() {
           </div>
         ) : null}
 
-        {results.length > 0 ? (
-          <ul className="mt-3 divide-y divide-border">
-            {results.map((p) => (
-              <li key={p.id} className="flex items-center justify-between gap-3 py-3">
-                <div>
-                  <p className="font-semibold">{p.name}</p>
-                  <p className="text-sm text-muted-foreground">Current stock: {p.stock}</p>
-                </div>
-                <Button
-                  variant={selectedId === p.id ? "default" : "outline"}
-                  onClick={() => {
-                    setSelectedId(p.id);
-                    setTerm("");
-                  }}
-                >
-                  Select
-                </Button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[700px] text-sm">
+            <thead>
+              <tr className="border-b text-left text-muted-foreground">
+                <th className="p-3">Item</th>
+                <th className="p-3">Category</th>
+                <th className="p-3">Current Stock</th>
+                <th className="p-3">Buying Price</th>
+                <th className="p-3">Selling Price</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {results.map((p) => (
+                <tr key={p.id} className="border-b border-border/60">
+                  <td className="p-3 font-semibold">{p.name}</td>
+                  <td className="p-3">{p.category}</td>
+                  <td className="p-3 font-medium">{p.stock}</td>
+                  <td className="p-3">{money(p.buyPrice)}</td>
+                  <td className="p-3">{money(p.sellPrice)}</td>
+                  <td className="p-3"><StockBadge status={stockStatus(p)} /></td>
+                  <td className="p-3 text-right">
+                    <Button
+                      variant={selectedId === p.id ? "default" : "outline"}
+                      onClick={() => setSelectedId(p.id)}
+                    >
+                      {selectedId === p.id ? "Selected" : "Select"}
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
       {selected ? (

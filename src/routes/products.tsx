@@ -163,35 +163,48 @@ function ProductsPage() {
             </Button>
           </div>
         ) : (
-          <ul className="mt-4 divide-y divide-border">
-            {list.map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center gap-3 py-4">
-                <div className="min-w-40 flex-1">
-                  <p className="font-semibold">{p.name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {p.category} · Buy {money(p.buyPrice)} · Sell {money(p.sellPrice)}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">Stock: {p.stock}</p>
-                  <StockBadge status={stockStatus(p)} />
-                </div>
-                <div className="flex gap-1">
-                  <Button size="icon" variant="ghost" onClick={() => openEdit(p)} aria-label="Edit">
-                    <Pencil className="size-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => setConfirmDelete(p)}
-                    aria-label="Delete"
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-4 overflow-x-auto">
+            <table className="w-full min-w-[760px] text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="p-3">Item</th>
+                  <th className="p-3">Category</th>
+                  <th className="p-3">Stock</th>
+                  <th className="p-3">Buying Price</th>
+                  <th className="p-3">Selling Price</th>
+                  <th className="p-3">Status</th>
+                  <th className="p-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {list.map((p) => (
+                  <tr key={p.id} className="border-b border-border/60">
+                    <td className="p-3 font-semibold">{p.name}</td>
+                    <td className="p-3">{p.category}</td>
+                    <td className="p-3 font-medium">{p.stock}</td>
+                    <td className="p-3">{money(p.buyPrice)}</td>
+                    <td className="p-3">{money(p.sellPrice)}</td>
+                    <td className="p-3"><StockBadge status={stockStatus(p)} /></td>
+                    <td className="p-3">
+                      <div className="flex justify-end gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(p)} aria-label="Edit">
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => setConfirmDelete(p)}
+                          aria-label="Delete"
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Card>
 
