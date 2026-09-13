@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/shop/AppLayout";
@@ -7,8 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { CATEGORIES } from "@/lib/shop/sample-data";
 import { money, searchProducts, stockStatus, useShop } from "@/lib/shop/store";
 import { StockBadge } from "@/components/shop/StatCard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/add-stock")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -28,11 +36,15 @@ export const Route = createFileRoute("/add-stock")({
   component: AddStockPage,
 });
 
+const PRODUCTS_PER_PAGE = 10;
+
 function AddStockPage() {
   const search = Route.useSearch();
   const preselect = search.product;
   const { data, addStock } = useShop();
   const [term, setTerm] = useState("");
+  const [category, setCategory] = useState("All");
+  const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(preselect ?? null);
   const [qty, setQty] = useState("");
   const [buyPrice, setBuyPrice] = useState("");
@@ -49,10 +61,22 @@ function AddStockPage() {
     }
   }, [selectedId]);
 
+  const filteredProducts = useMemo(() => {
+    const products = searchProducts(data.products, term);
+    return [...products]
+      .filter((product) => category === "All" || product.category === category)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [data.products, term, category]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  const currentPage = Math.min(page, pageCount);
   const results = useMemo(
     () =>
-      [...searchProducts(data.products, term)].sort((a, b) => a.name.localeCompare(b.name)),
-    [data.products, term],
+      filteredProducts.slice(
+        (currentPage - 1) * PRODUCTS_PER_PAGE,
+        currentPage * PRODUCTS_PER_PAGE,
+      ),
+    [filteredProducts, currentPage],
   );
 
   const adding = Number(qty) || 0;
@@ -100,14 +124,38 @@ function AddStockPage() {
       <PageTitle title="Add Stock" subtitle="Find the product, type how many you bought, save." />
 
       <Card className="p-4">
-        <div className="relative">
-          <Search className="absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={term}
-            onChange={(e) => setTerm(e.target.value)}
-            placeholder="Search product..."
-            className="h-14 pl-11 text-base"
-          />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={term}
+              onChange={(e) => {
+                setTerm(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search product..."
+              className="h-14 pl-11 text-base"
+            />
+          </div>
+          <Select
+            value={category}
+            onValueChange={(value) => {
+              setCategory(value);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="h-14 sm:w-52">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All categories</SelectItem>
+              {CATEGORIES.map((item) => (
+                <SelectItem key={item} value={item}>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {term.trim() && results.length === 0 ? (
@@ -153,6 +201,35 @@ function AddStockPage() {
               ))}
             </tbody>
           </table>
+          <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3">
+            <p className="text-sm text-muted-foreground">
+              Showing {filteredProducts.length === 0 ? 0 : (currentPage - 1) * PRODUCTS_PER_PAGE + 1}
+              -{Math.min(currentPage * PRODUCTS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setPage((value) => Math.max(1, value - 1))}
+                disabled={currentPage === 1}
+                aria-label="Previous page"
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <span className="min-w-20 text-center text-sm font-medium">
+                Page {currentPage} of {pageCount}
+              </span>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setPage((value) => Math.min(pageCount, value + 1))}
+                disabled={currentPage === pageCount}
+                aria-label="Next page"
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </Card>
 
